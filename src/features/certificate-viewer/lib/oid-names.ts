@@ -1,0 +1,36 @@
+export const OID_NAMES: Record<string, string> = {
+  "2.5.4.3": "Common Name",
+  "2.5.4.4": "Surname",
+  "2.5.4.5": "Serial Number",
+  "2.5.4.6": "Country",
+  "2.5.4.7": "Locality",
+  "2.5.4.8": "State / Province",
+  "2.5.4.9": "Street Address",
+  "2.5.4.10": "Organization",
+  "2.5.4.11": "Organizational Unit",
+  "2.5.4.12": "Title",
+  "2.5.4.42": "Given Name",
+  "1.2.840.113549.1.9.1": "Email",
+  "2.5.29.14": "Subject Key Identifier",
+  "2.5.29.15": "Key Usage",
+  "2.5.29.17": "Subject Alternative Name",
+  "2.5.29.19": "Basic Constraints",
+  "2.5.29.31": "CRL Distribution Points",
+  "2.5.29.32": "Certificate Policies",
+  "2.5.29.35": "Authority Key Identifier",
+  "2.5.29.37": "Extended Key Usage",
+  "1.3.6.1.5.5.7.1.1": "Authority Information Access",
+  "1.2.840.113549.1.1.1": "RSA",
+  "1.2.840.113549.1.1.5": "SHA-1 with RSA",
+  "1.2.840.113549.1.1.11": "SHA-256 with RSA",
+  "1.2.840.113549.1.1.12": "SHA-384 with RSA",
+  "1.2.840.113549.1.1.13": "SHA-512 with RSA",
+  "1.2.840.10045.2.1": "Elliptic Curve",
+  "1.2.840.10045.4.3.2": "ECDSA with SHA-256",
+  "1.2.840.10045.4.3.3": "ECDSA with SHA-384",
+  "1.3.101.112": "Ed25519",
+};
+
+export function oidName(oid: string): string {
+  return OID_NAMES[oid] ?? oid;
+}
