@@ -1,7 +1,10 @@
-# Contributing
+# Участие в разработке
 
-1. Create a focused branch.
-2. Keep business logic inside a feature folder.
-3. Add tests for changed behavior.
-4. Run `npm run check` before opening a pull request.
-5. Do not add network calls, tracking or large dependencies without justification.
+1. Используйте Node.js 22 и установите зависимости командой `npm ci`.
+2. Создайте отдельную ветку с небольшим, сфокусированным изменением.
+3. Не добавляйте сетевые запросы, аналитику или крупные зависимости без обоснования.
+4. Для изменений парсера добавляйте проверки пустых, поврежденных и слишком больших файлов.
+5. Перед pull request выполните `npm run check` и `npm audit --omit=dev --audit-level=high`.
+6. Обновите README/CHANGELOG, если меняется поведение пользователя или процесс выпуска.
+
+Бизнес-логика находится в `src/features/certificate-viewer`, общие UI-компоненты — в `src/components`. Уязвимости сообщайте по правилам из [SECURITY.md](SECURITY.md), не через публичные issues.

@@ -1,8 +1,32 @@
-# Changelog
+# История изменений
 
-## 0.1.0
+Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/), проект использует [Semantic Versioning](https://semver.org/lang/ru/).
 
-- Реализован локальный просмотр PEM, DER, CER и CRT.
-- Добавлен разбор bundles с несколькими сертификатами.
-- Добавлены основные поля X.509, расширения, fingerprints и предупреждения.
-- Добавлены экспорт JSON и PEM, копирование значений и адаптивный интерфейс.
+## [0.2.0] — 2026-07-20
+
+### Добавлено
+
+- автоматическая публикация статической сборки в GitHub Pages;
+- security workflow с `npm audit`, CodeQL и dependency review;
+- Dependabot для npm и GitHub Actions;
+- лимиты размера отдельного сертификата и количества сертификатов в PEM bundle;
+- строгая проверка Base64 в PEM;
+- отчет об аудите безопасности.
+
+### Изменено
+
+- CI использует единую команду `npm run check`;
+- Next.js и ESLint config обновлены с 16.1.4 до 16.2.10 для устранения high-severity advisory;
+- обновлены README, политика безопасности, архитектура, руководство участника и планы.
+
+## [0.1.0] — 2026-07-20
+
+### Добавлено
+
+- локальный просмотр PEM, DER, CER и CRT;
+- разбор PEM bundles с несколькими сертификатами;
+- основные поля X.509, расширения, fingerprints и предупреждения;
+- экспорт JSON и PEM, копирование значений и адаптивный интерфейс.
+
+[0.2.0]: https://github.com/vanitoo/certificate-viewer/compare/v0.1.0...v0.2.0
+[0.1.0]: https://github.com/vanitoo/certificate-viewer/releases/tag/v0.1.0

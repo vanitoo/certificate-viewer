@@ -1,12 +1,21 @@
-# Security Policy
+# Политика безопасности
 
-This template is designed for local browser processing.
+## Поддерживаемые версии
 
-- Do not upload user files unless the product explicitly requires it.
-- Do not add analytics or telemetry silently.
-- Avoid rendering untrusted HTML. Parse input as data.
-- Validate file type, size and structure before processing.
-- Move expensive work to a Web Worker and enforce practical limits.
-- Audit dependencies before release.
+Исправления безопасности выпускаются для последней версии в ветке `main`.
 
-Report vulnerabilities through a private GitHub security advisory.
+## Сообщить об уязвимости
+
+Не создавайте публичный issue. Откройте приватный отчет через **Security → Advisories → New draft security advisory** в GitHub-репозитории. Укажите шаги воспроизведения, влияние и, если возможно, минимальный тестовый файл без персональных данных.
+
+Мы постараемся подтвердить получение в течение 7 дней. Срок исправления зависит от серьезности проблемы. Информация публикуется только после выпуска исправления.
+
+## Модель безопасности
+
+- файлы обрабатываются локально через File API и не отправляются по сети;
+- вход ограничен 10 МБ, отдельный сертификат — 2 МБ, bundle — 100 сертификатами;
+- содержимое сертификатов выводится как React-текст, без исполнения HTML;
+- приложение не хранит данные в localStorage/IndexedDB и не добавляет аналитику;
+- приложение не проверяет доверие цепочки, OCSP или CRL и не должно использоваться как единственный инструмент принятия решений о доверии.
+
+Автоматические проверки описаны в [отчете аудита](docs/SECURITY_AUDIT.md).

@@ -1,6 +1,6 @@
 {
   "name": "certificate-viewer",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "Privacy-first local X.509 certificate viewer for PEM, DER, CER and CRT files.",
   "scripts": {
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "asn1js": "^3.0.10",
-    "next": "16.1.4",
+    "next": "16.2.10",
     "pkijs": "^3.4.0",
     "react": "19.2.3",
     "react-dom": "19.2.3"
@@ -24,7 +24,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.1.4",
+    "eslint-config-next": "16.2.10",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

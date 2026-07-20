@@ -12,6 +12,8 @@ import type {
 
 const PEM_PATTERN = /-----BEGIN CERTIFICATE-----([\s\S]*?)-----END CERTIFICATE-----/g;
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
+const MAX_CERTIFICATES = 100;
+const MAX_CERTIFICATE_SIZE = 2 * 1024 * 1024;
 
 function bytesToBase64(bytes: Uint8Array): string {
   let binary = "";
@@ -24,6 +26,9 @@ function bytesToBase64(bytes: Uint8Array): string {
 
 function base64ToBytes(value: string): Uint8Array {
   const normalized = value.replace(/\s/g, "");
+  if (!normalized || !/^[A-Za-z0-9+/]+={0,2}$/.test(normalized) || normalized.length % 4 !== 0) {
+    throw new Error("PEM содержит некорректные данные Base64.");
+  }
   const binary = atob(normalized);
   return Uint8Array.from(binary, (character) => character.charCodeAt(0));
 }
@@ -195,9 +200,17 @@ export async function parseCertificateFile(file: File): Promise<ParsedCertificat
   const text = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
   const matches = Array.from(text.matchAll(PEM_PATTERN));
 
+  if (matches.length > MAX_CERTIFICATES) {
+    throw new Error(`В файле слишком много сертификатов. Максимум — ${MAX_CERTIFICATES}.`);
+  }
+
   const sources = matches.length > 0
     ? matches.map((match) => ({ bytes: base64ToBytes(match[1]), encoding: "pem" as const }))
     : [{ bytes, encoding: "der" as const }];
+
+  if (sources.some((source) => source.bytes.byteLength > MAX_CERTIFICATE_SIZE)) {
+    throw new Error("Один из сертификатов превышает допустимый размер 2 МБ.");
+  }
 
   const certificates = await Promise.all(sources.map((source, index) => parseOne(source.bytes, file.name, source.encoding, index)));
   return { fileName: file.name, fileSize: file.size, certificates };
