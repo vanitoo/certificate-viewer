@@ -15,14 +15,16 @@ jobs:
   dependency-audit:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
-          cache: npm
-      - run: npm ci --ignore-scripts
+      - name: Install dependencies from public npm registry
+        run: |
+          rm -f package-lock.json
+          npm install --no-package-lock --ignore-scripts --registry=https://registry.npmjs.org
       - name: Audit production dependencies
-        run: npm audit --omit=dev --audit-level=high
+        run: npm audit --omit=dev --audit-level=high --registry=https://registry.npmjs.org
 
   codeql:
     runs-on: ubuntu-latest
@@ -31,11 +33,11 @@ jobs:
       security-events: write
       packages: read
     steps:
-      - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
+      - uses: actions/checkout@v7
+      - uses: github/codeql-action/init@v4
         with:
           languages: javascript-typescript
-      - uses: github/codeql-action/analyze@v3
+      - uses: github/codeql-action/analyze@v4
 
   dependency-review:
     if: github.event_name == 'pull_request'
@@ -43,7 +45,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/dependency-review-action@v4
         with:
           fail-on-severity: high
