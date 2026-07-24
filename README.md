@@ -54,3 +54,4 @@ CI выполняет typecheck, lint и production build. Отдельный wo
 - [Планы](TODO.md)
 
 Лицензия — [MIT](LICENSE).
+
