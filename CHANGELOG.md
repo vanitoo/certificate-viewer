@@ -7,13 +7,19 @@
 ### Добавлено
 
 - Vitest как тестовый раннер;
-- unit-тесты парсера для валидного PEM и PEM bundle;
+- fixtures валидного PEM и DER, expired, not-yet-valid, SHA-1 и RSA-1024 сертификатов;
+- unit-тесты парсера для валидного PEM, валидного DER и PEM bundle;
+- тест совпадения SHA-256 fingerprint у PEM и DER одного сертификата;
+- тесты статусов и предупреждений для expired и not-yet-valid сертификатов;
+- тесты предупреждений SHA-1 и слабого RSA-ключа;
+- тесты Distinguished Name, SAN, Key Usage, Extended Key Usage, Basic Constraints, AIA, CRL Distribution Points, `critical` и неизвестного OID;
 - негативные тесты пустого файла, повреждённого Base64 и повреждённого DER;
 - тесты ограничений 10 МБ на файл, 2 МБ на сертификат и 100 сертификатов на bundle;
 - команды `npm test` и `npm run test:watch`.
 
 ### Изменено
 
+- тестовые сертификаты вынесены из test-файла в каталог `__fixtures__`;
 - `npm run check` теперь включает unit-тесты перед production build;
 - GitHub Actions обновлены до актуальных major-версий: `checkout@v7`, `setup-node@v7`, `upload-pages-artifact@v5`, `deploy-pages@v5`, `codeql-action@v4`;
 - Dependabot ограничен minor/patch-обновлениями для npm и GitHub Actions;
@@ -27,7 +33,7 @@
 ### Технический долг
 
 - требуется регенерировать чистый `package-lock.json` через `registry.npmjs.org` и вернуть воспроизводимую установку `npm ci` во все workflow;
-- тестовые сертификаты пока встроены в test-файл; позже их нужно вынести в отдельные fixtures и добавить валидный DER fixture.
+- текущий размер RSA-ключа определяется по длине ASN.1 BIT STRING; до 0.3.0 нужно вычислять точную битовую длину modulus и добавить контрольные тесты RSA-1024/RSA-2048.
 
 ## [0.2.0] — 2026-07-20
 
@@ -38,7 +44,7 @@
 - Dependabot для npm и GitHub Actions;
 - лимиты размера отдельного сертификата и количества сертификатов в PEM bundle;
 - строгая проверка Base64 в PEM;
-- отчёт об аудите безопасности.
+- отчет об аудите безопасности.
 
 ### Изменено
 
