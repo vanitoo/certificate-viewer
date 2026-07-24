@@ -7,9 +7,9 @@ export default function Home() {
     <div className="app-shell">
       <AppHeader />
       <CertificateViewer />
-      <footer>
+      <footer style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap" }}>
         <span>MIT License · Все операции выполняются на вашем устройстве.</span>
-        <span className="app-version">Версия {packageJson.version}</span>
+        <span>Версия {packageJson.version}</span>
       </footer>
     </div>
   );
