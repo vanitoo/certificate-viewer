@@ -1,55 +1,116 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { oidName } from "./oid-names";
 import { parseCertificateFile } from "./parse-certificate";
 
-const CERTIFICATE_PEM = `-----BEGIN CERTIFICATE-----
-MIIDvDCCAqSgAwIBAgIUD/JnB8J1qzhUey3aR+Q4//oL/G0wDQYJKoZIhvcNAQEL
-BQAwTDEgMB4GA1UEAwwXY2VydGlmaWNhdGUtdmlld2VyLnRlc3QxGzAZBgNVBAoM
-EkNlcnRpZmljYXRlIFZpZXdlcjELMAkGA1UEBhMCUlUwHhcNMjYwNzI0MTM1NDAx
-WhcNMzYwNzIxMTM1NDAxWjBMMSAwHgYDVQQDDBdjZXJ0aWZpY2F0ZS12aWV3ZXIu
-dGVzdDEbMBkGA1UECgwSQ2VydGlmaWNhdGUgVmlld2VyMQswCQYDVQQGEwJSVTCC
-ASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBANLoSjBM/j++E+W9U7UpezOl
-Ik20xfCDJqwPzXS6tXzAJdfpnH9wYgaDpsUjw6Zzayo74jly55ZAGbCzwhfhBPxd
-GB7l4TOTUtDsBHUj8Mbg7vKkbyu9gyJXFrRDXAtY8eZwvnIeo7FJVDArJb1oJMdH
-xe3c414S8MLDvT2xv0o5/ws5bcqVbjFUk74lpWY5KEIR2Ic6OSUzch5P/7qDlG/w
-eR0B8UXKBw7RdQuMfU9+U54bck3fdCla4zLVAs2myxA0z4+bUy1xTGYtMJIqUel7
-eM6LjRzrOtOlyEDr9HJmQGfO5Wer5/MiaA/JHn9ERNPVFfWOTX6E16g69wbwPMkC
-AwEAAaOBlTCBkjAdBgNVHQ4EFgQU8VXjPZJoXl3EfkukF36gQ4EflewwHwYDVR0j
-BBgwFoAU8VXjPZJoXl3EfkukF36gQ4EflewwDwYDVR0TAQH/BAUwAwEB/zA/BgNV
-HREEODA2ghdjZXJ0aWZpY2F0ZS12aWV3ZXIudGVzdIIbd3d3LmNlcnRpZmljYXRl
-LXZpZXdlci50ZXN0MA0GCSqGSIb3DQEBCwUAA4IBAQAvPzUfXLw4sTPGP821nCI4
-BzLAJP9fz0lRJpn6p7KRnGhePqySHuEd6FMd2sIL4esjuJUJBPL3pPrliseHTqlx
-nwSkhNMVEoVK63AWPesFDw0CjtZzB5xUak2kahnfT1OiGkCApu9XCarDBodEoBmU
-CQduZb/MtYPHYjqJb4ekfD8fTkDuYimolXZSac3jfkj1JsQ/j3BJeqp55K1n21LE
-aoinGS1zTrApGb5ncoosDb1byBeDugHlN8Redi1Xl7QoCxr+l+L4wZfFt4Ilvv3E
-ZchqDJ1bgtWW/dIiiHr6KWCWpkGsD0yxznhcYsjqvggm0LUMTz/PvICivuhRBTiO
------END CERTIFICATE-----`;
+function fixture(name: string): string {
+  return readFileSync(new URL(`./__fixtures__/${name}`, import.meta.url), "utf8").trim();
+}
 
 function textFile(contents: string, name = "certificate.pem"): File {
   return new File([contents], name, { type: "application/x-pem-file" });
 }
 
-describe("parseCertificateFile", () => {
+function derFile(base64: string, name = "certificate.der"): File {
+  const binary = atob(base64.replace(/\s/g, ""));
+  const bytes = Uint8Array.from(binary, (character) => character.charCodeAt(0));
+  return new File([bytes], name, { type: "application/pkix-cert" });
+}
+
+function warningTitles(file: Awaited<ReturnType<typeof parseCertificateFile>>): string[] {
+  return file.certificates[0].warnings.map((warning) => warning.title);
+}
+
+const VALID_PEM = fixture("valid.pem");
+
+ describe("parseCertificateFile", () => {
   it("parses a valid PEM certificate", async () => {
-    const result = await parseCertificateFile(textFile(CERTIFICATE_PEM));
+    const result = await parseCertificateFile(textFile(VALID_PEM));
+    const certificate = result.certificates[0];
 
     expect(result.fileName).toBe("certificate.pem");
     expect(result.certificates).toHaveLength(1);
-    expect(result.certificates[0]).toMatchObject({
+    expect(certificate).toMatchObject({
       encoding: "pem",
-      subjectLabel: "certificate-viewer.test",
-      issuerLabel: "certificate-viewer.test",
+      subjectLabel: "valid.test",
+      issuerLabel: "valid.test",
       version: 3,
       publicKeyAlgorithm: "RSA",
     });
-    expect(result.certificates[0].fingerprints.sha256).toMatch(/^([0-9A-F]{2}:){31}[0-9A-F]{2}$/);
-    expect(result.certificates[0].warnings.some((warning) => warning.title === "Самоподписанный сертификат")).toBe(true);
+    expect(certificate.fingerprints.sha256).toMatch(/^([0-9A-F]{2}:){31}[0-9A-F]{2}$/);
+    expect(warningTitles(result)).toContain("Самоподписанный сертификат");
+  });
+
+  it("parses a valid DER certificate and produces the same fingerprint as PEM", async () => {
+    const pem = await parseCertificateFile(textFile(VALID_PEM));
+    const der = await parseCertificateFile(derFile(fixture("valid.der.b64")));
+
+    expect(der.certificates).toHaveLength(1);
+    expect(der.certificates[0]).toMatchObject({
+      encoding: "der",
+      subjectLabel: "valid.test",
+      issuerLabel: "valid.test",
+    });
+    expect(der.certificates[0].fingerprints.sha256).toBe(pem.certificates[0].fingerprints.sha256);
   });
 
   it("parses every certificate in a PEM bundle", async () => {
-    const result = await parseCertificateFile(textFile(`${CERTIFICATE_PEM}\n${CERTIFICATE_PEM}`, "bundle.pem"));
+    const result = await parseCertificateFile(textFile(`${VALID_PEM}\n${VALID_PEM}`, "bundle.pem"));
 
     expect(result.certificates).toHaveLength(2);
     expect(result.certificates.map((certificate) => certificate.sourceIndex)).toEqual([0, 1]);
+  });
+
+  it("marks an expired certificate and creates a critical warning", async () => {
+    const result = await parseCertificateFile(textFile(fixture("expired.pem"), "expired.pem"));
+
+    expect(result.certificates[0].validityStatus).toBe("expired");
+    expect(result.certificates[0].daysRemaining).toBeLessThan(0);
+    expect(warningTitles(result)).toContain("Сертификат просрочен");
+  });
+
+  it("marks a certificate that is not valid yet", async () => {
+    const result = await parseCertificateFile(textFile(fixture("future.pem"), "future.pem"));
+
+    expect(result.certificates[0].validityStatus).toBe("not-yet-valid");
+    expect(warningTitles(result)).toContain("Ещё не действует");
+  });
+
+  it("warns about a SHA-1 signature", async () => {
+    const result = await parseCertificateFile(textFile(fixture("sha1.pem"), "sha1.pem"));
+
+    expect(result.certificates[0].signatureAlgorithm).toBe("SHA-1 with RSA");
+    expect(warningTitles(result)).toContain("Подпись SHA-1");
+  });
+
+  it("warns about an RSA key smaller than 2048 bits", async () => {
+    const result = await parseCertificateFile(textFile(fixture("rsa1024.pem"), "rsa1024.pem"));
+    const bits = Number(result.certificates[0].publicKeyDetails.match(/(\d+) bit/)?.[1]);
+
+    expect(bits).toBeGreaterThan(0);
+    expect(bits).toBeLessThan(2048);
+    expect(warningTitles(result)).toContain("Слабый RSA-ключ");
+  });
+
+  it("maps distinguished-name and extension OIDs without losing unknown OIDs", async () => {
+    const result = await parseCertificateFile(textFile(VALID_PEM));
+    const certificate = result.certificates[0];
+    const extensions = new Map(certificate.extensions.map((extension) => [extension.oid, extension]));
+
+    expect(certificate.subject).toEqual(expect.arrayContaining([
+      expect.objectContaining({ oid: "2.5.4.3", name: "Common Name", value: "valid.test" }),
+      expect.objectContaining({ oid: "2.5.4.10", name: "Organization", value: "Certificate Viewer Tests" }),
+      expect.objectContaining({ oid: "2.5.4.6", name: "Country", value: "RU" }),
+    ]));
+
+    expect(extensions.get("2.5.29.17")?.name).toBe("Subject Alternative Name");
+    expect(extensions.get("2.5.29.15")).toMatchObject({ name: "Key Usage", critical: true });
+    expect(extensions.get("2.5.29.37")?.name).toBe("Extended Key Usage");
+    expect(extensions.get("2.5.29.19")).toMatchObject({ name: "Basic Constraints", critical: true });
+    expect(extensions.get("1.3.6.1.5.5.7.1.1")?.name).toBe("Authority Information Access");
+    expect(extensions.get("2.5.29.31")?.name).toBe("CRL Distribution Points");
+    expect(extensions.get("1.2.3.4.5.6.7")?.name).toBe("1.2.3.4.5.6.7");
+    expect(oidName("1.2.3.4.5.6.7")).toBe("1.2.3.4.5.6.7");
   });
 
   it("rejects an empty file", async () => {
@@ -72,7 +133,7 @@ describe("parseCertificateFile", () => {
   });
 
   it("rejects bundles with more than 100 certificates", async () => {
-    const bundle = Array.from({ length: 101 }, () => CERTIFICATE_PEM).join("\n");
+    const bundle = Array.from({ length: 101 }, () => VALID_PEM).join("\n");
     await expect(parseCertificateFile(textFile(bundle, "too-many.pem"))).rejects.toThrow("В файле слишком много сертификатов. Максимум — 100.");
   });
 
