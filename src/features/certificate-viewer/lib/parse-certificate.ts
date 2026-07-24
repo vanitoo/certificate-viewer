@@ -141,9 +141,19 @@ function publicKeyDetails(certificate: Certificate): string {
 async function parseOne(bytes: Uint8Array, fileName: string, encoding: CertificateEncoding, sourceIndex: number): Promise<ParsedCertificate> {
   const source = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
   const asn1 = asn1js.fromBER(source);
-  if (asn1.offset === -1) throw new Error(`Сертификат №${sourceIndex + 1} содержит некорректную ASN.1/DER-структуру.`);
+  const invalidStructureMessage = `Сертификат №${sourceIndex + 1} содержит некорректную ASN.1/DER-структуру.`;
 
-  const certificate = new Certificate({ schema: asn1.result });
+  if (asn1.offset === -1 || asn1.offset !== source.byteLength) {
+    throw new Error(invalidStructureMessage);
+  }
+
+  let certificate: Certificate;
+  try {
+    certificate = new Certificate({ schema: asn1.result });
+  } catch {
+    throw new Error(invalidStructureMessage);
+  }
+
   const subject = parseName(certificate.subject.typesAndValues);
   const issuer = parseName(certificate.issuer.typesAndValues);
   const notBefore = certificate.notBefore.value;
