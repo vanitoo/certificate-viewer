@@ -43,6 +43,7 @@ Certificate Viewer подходит для быстрого просмотра �
 - TypeScript в строгом режиме;
 - PKI.js и ASN1.js;
 - Web Crypto API;
+- Vitest;
 - Tailwind CSS 4;
 - статический экспорт без серверной части.
 
@@ -57,11 +58,29 @@ npm run dev
 
 Откройте <http://localhost:3000>.
 
+### Тесты
+
+Однократный запуск unit-тестов:
+
+```bash
+npm test
+```
+
+Режим наблюдения при разработке парсера:
+
+```bash
+npm run test:watch
+```
+
+Тесты проверяют валидный PEM, PEM bundle, пустой файл, повреждённый Base64 и DER, а также лимиты размера файла, размера сертификата и количества сертификатов.
+
 Полная проверка проекта:
 
 ```bash
 npm run check
 ```
+
+Команда последовательно запускает TypeScript, ESLint, unit-тесты и production build.
 
 Статическая сборка создаётся в каталоге `out/`:
 
@@ -91,7 +110,7 @@ Workflow `.github/workflows/deploy-pages.yml` автоматически пуб�
 - нет сетевой отправки пользовательских файлов;
 - значения отображаются React как текст;
 - `dangerouslySetInnerHTML` не используется;
-- CI выполняет typecheck, lint и production build;
+- CI выполняет typecheck, lint, unit-тесты и production build;
 - Security workflow запускает `npm audit`, CodeQL и Dependency Review;
 - Dependabot ограничен minor/patch-обновлениями.
 
@@ -107,4 +126,4 @@ Workflow `.github/workflows/deploy-pages.yml` автоматически пуб�
 
 ## Лицензия
 
-[MIT](LICENSE)
+[MIT](LICENSE).
