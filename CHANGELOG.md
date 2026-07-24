@@ -2,6 +2,23 @@
 
 Формат основан на [Keep a Changelog](https://keepachangelog.com/ru/1.1.0/), проект использует [Semantic Versioning](https://semver.org/lang/ru/).
 
+## [Unreleased]
+
+### Изменено
+
+- GitHub Actions обновлены до актуальных major-версий: `checkout@v7`, `setup-node@v7`, `upload-pages-artifact@v5`, `deploy-pages@v5`, `codeql-action@v4`;
+- Dependabot ограничен minor/patch-обновлениями для npm и GitHub Actions;
+- CI, Security и Pages временно устанавливают зависимости напрямую из публичного npm registry, не используя непереносимый lock-файл;
+- README, архитектура, аудит безопасности, руководство участника и roadmap приведены в соответствие с текущим состоянием проекта.
+
+### Исправлено
+
+- устранено падение GitHub Pages и проверок pull request из-за внутренних URL npm mirror в `package-lock.json`.
+
+### Технический долг
+
+- требуется регенерировать чистый `package-lock.json` через `registry.npmjs.org` и вернуть воспроизводимую установку `npm ci` во все workflow.
+
 ## [0.2.0] — 2026-07-20
 
 ### Добавлено
@@ -11,7 +28,7 @@
 - Dependabot для npm и GitHub Actions;
 - лимиты размера отдельного сертификата и количества сертификатов в PEM bundle;
 - строгая проверка Base64 в PEM;
-- отчет об аудите безопасности.
+- отчёт об аудите безопасности.
 
 ### Изменено
 
@@ -28,5 +45,6 @@
 - основные поля X.509, расширения, fingerprints и предупреждения;
 - экспорт JSON и PEM, копирование значений и адаптивный интерфейс.
 
+[Unreleased]: https://github.com/vanitoo/certificate-viewer/compare/v0.2.0...HEAD
 [0.2.0]: https://github.com/vanitoo/certificate-viewer/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/vanitoo/certificate-viewer/releases/tag/v0.1.0
